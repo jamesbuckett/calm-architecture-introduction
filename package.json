@@ -10,9 +10,16 @@
     "type": "git",
     "url": "git+https://github.com/jamesbuckett/calm-architecture-introduction.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "calm",
+    "finos",
+    "architecture-as-code",
+    "architecture",
+    "c4",
+    "json-schema"
+  ],
+  "author": "James Buckett",
+  "license": "MIT",
   "type": "module",
   "bugs": {
     "url": "https://github.com/jamesbuckett/calm-architecture-introduction/issues"
