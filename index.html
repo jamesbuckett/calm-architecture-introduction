@@ -5,8 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CALM — Common Architecture Language Model</title>
 <meta name="description" content="An architect-to-architect primer on the FINOS Common Architecture Language Model (CALM): concepts, install, hands-on tutorial, glossary.">
+<script>
+  // Set theme before first paint to avoid FOUC.
+  (function () {
+    try {
+      var saved = localStorage.getItem('calm-theme');
+      var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      var theme = saved || (prefersLight ? 'light' : 'dark');
+      if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    } catch (e) {}
+  })();
+</script>
 <style>
   :root {
+    color-scheme: dark;
+
     --bg: #0f1419;
     --panel: #1a2028;
     --panel-2: #232b35;
@@ -28,6 +41,16 @@
     --danger-soft: rgba(255, 107, 107, 0.10);
     --code-bg: #0a0e12;
     --code-border: #1f2731;
+    --code-head-bg: rgba(0, 0, 0, 0.18);
+
+    --nav-bg: rgba(15, 20, 25, 0.86);
+    --grid-color: rgba(255, 255, 255, 0.014);
+
+    --syntax-text:     #c8d2dc;
+    --syntax-keyword:  #c8acff;
+    --syntax-string:   #b8d68c;
+    --syntax-number:   #ffb86c;
+    --syntax-function: #ffb86c;
 
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, "Liberation Mono", monospace;
@@ -36,6 +59,64 @@
     --maxw-narrow: 880px;
     --gutter: clamp(16px, 4vw, 32px);
   }
+
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --bg: #f7f7f5;
+    --panel: #ffffff;
+    --panel-2: #f3f4f6;
+    --panel-3: #e9ecef;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --text: #0a0a0a;
+    --text-mid: #4b5563;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+    --accent: #1c7ed6;
+    --accent-soft: rgba(28, 126, 214, 0.10);
+    --accent-line: rgba(28, 126, 214, 0.34);
+    --success: #2f9e44;
+    --success-soft: rgba(47, 158, 68, 0.10);
+    --warning: #d97706;
+    --warning-soft: rgba(217, 119, 6, 0.12);
+    --danger: #c92a2a;
+    --danger-soft: rgba(201, 42, 42, 0.10);
+    --code-bg: #f8f9fa;
+    --code-border: #e9ecef;
+    --code-head-bg: rgba(0, 0, 0, 0.04);
+
+    --nav-bg: rgba(247, 247, 245, 0.88);
+    --grid-color: rgba(0, 0, 0, 0.022);
+
+    --syntax-text:     #1f2937;
+    --syntax-keyword:  #6b21a8;
+    --syntax-string:   #15803d;
+    --syntax-number:   #b45309;
+    --syntax-function: #c2410c;
+  }
+
+  /* SVG palette remap — lets inline diagrams adapt to the active theme
+     without rewriting the SVG markup. Matches the dark-theme hex values
+     used in this document and rewires them to CSS variables. */
+  svg [fill="#0f1419"]   { fill: var(--bg); }
+  svg [fill="#1a2028"]   { fill: var(--panel); }
+  svg [fill="#232b35"]   { fill: var(--panel-2); }
+  svg [fill="#5a6573"]   { fill: var(--text-dim); }
+  svg [fill="#7c8693"]   { fill: var(--text-muted); }
+  svg [fill="#aeb6c0"]   { fill: var(--text-mid); }
+  svg [fill="#e8ebee"]   { fill: var(--text); }
+  svg [fill="#4dabf7"]   { fill: var(--accent); }
+  svg [fill="#ffd43b"]   { fill: var(--warning); }
+  svg [fill="#51cf66"]   { fill: var(--success); }
+  svg [fill="#ff6b6b"]   { fill: var(--danger); }
+  svg [stroke="#2a3340"] { stroke: var(--border); }
+  svg [stroke="#3a4452"] { stroke: var(--border-strong); }
+  svg [stroke="#4dabf7"] { stroke: var(--accent); }
+  svg [stroke="#ffd43b"] { stroke: var(--warning); }
+  svg [stroke="#51cf66"] { stroke: var(--success); }
+  svg [stroke="#ff6b6b"] { stroke: var(--danger); }
+  svg [stroke="#5a6573"] { stroke: var(--text-dim); }
 
   *,
   *::before,
@@ -66,8 +147,8 @@
     pointer-events: none;
     z-index: 0;
     background-image:
-      linear-gradient(to right, rgba(255,255,255,0.014) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,0.014) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(ellipse at top, black 0%, transparent 75%);
   }
@@ -98,7 +179,7 @@
     position: sticky;
     top: 0;
     z-index: 40;
-    background: rgba(15, 20, 25, 0.86);
+    background: var(--nav-bg);
     backdrop-filter: saturate(160%) blur(10px);
     -webkit-backdrop-filter: saturate(160%) blur(10px);
     border-bottom: 1px solid var(--border);
@@ -163,8 +244,39 @@
   }
   .nav-links a:hover {
     color: var(--text);
-    background: var(--panel);
+    background: var(--panel-2);
   }
+
+  /* ---------- Theme toggle ---------- */
+  .theme-toggle {
+    flex-shrink: 0;
+    margin-left: 4px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  }
+  .theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+  }
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .theme-toggle svg { width: 16px; height: 16px; display: block; }
+  .theme-toggle .t-moon { display: none; }
+  [data-theme="light"] .theme-toggle .t-sun { display: none; }
+  [data-theme="light"] .theme-toggle .t-moon { display: block; }
 
   /* ---------- Layout helpers ---------- */
   main {
@@ -514,7 +626,7 @@
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: rgba(0,0,0,0.18);
+    background: var(--code-head-bg);
   }
   .code-lang { color: var(--text-mid); }
   .code-copy {
@@ -539,14 +651,14 @@
     font-family: var(--font-mono);
     font-size: 14px;
     line-height: 1.6;
-    color: #c8d2dc;
+    color: var(--syntax-text);
   }
   .code-block pre .c-cmt { color: var(--text-dim); }
-  .code-block pre .c-key { color: #c8acff; }
-  .code-block pre .c-str { color: #b8d68c; }
-  .code-block pre .c-num { color: #ffb86c; }
+  .code-block pre .c-key { color: var(--syntax-keyword); }
+  .code-block pre .c-str { color: var(--syntax-string); }
+  .code-block pre .c-num { color: var(--syntax-number); }
   .code-block pre .c-attr { color: var(--accent); }
-  .code-block pre .c-fn { color: #ffb86c; }
+  .code-block pre .c-fn { color: var(--syntax-function); }
   .code-block pre .c-out { color: var(--text-muted); }
   .code-block pre .c-ok { color: var(--success); }
   .code-block pre .c-warn { color: var(--warning); }
@@ -749,6 +861,15 @@
       <li><a href="#takeaways">Takeaways</a></li>
       <li><a href="#reading">Reading</a></li>
     </ul>
+    <button class="theme-toggle" type="button" aria-label="Switch to light theme">
+      <svg class="t-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+      <svg class="t-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
   </div>
 </nav>
 
@@ -1945,6 +2066,31 @@ mvn quarkus:dev
         }
       });
     });
+
+    // Theme toggle: light / dark with localStorage persistence
+    var toggle = document.querySelector('.theme-toggle');
+    if (toggle) {
+      function currentTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      }
+      function updateLabel() {
+        toggle.setAttribute(
+          'aria-label',
+          currentTheme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'
+        );
+      }
+      updateLabel();
+      toggle.addEventListener('click', function () {
+        var next = currentTheme() === 'light' ? 'dark' : 'light';
+        if (next === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+        try { localStorage.setItem('calm-theme', next); } catch (e) {}
+        updateLabel();
+      });
+    }
 
     // Highlight active section in nav on scroll
     var sections = document.querySelectorAll('main section[id]');
