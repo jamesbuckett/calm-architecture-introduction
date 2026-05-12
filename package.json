@@ -1,0 +1,24 @@
+{
+  "name": "calm-architecture-introduction",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesbuckett/calm-architecture-introduction.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/jamesbuckett/calm-architecture-introduction/issues"
+  },
+  "homepage": "https://github.com/jamesbuckett/calm-architecture-introduction#readme",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
