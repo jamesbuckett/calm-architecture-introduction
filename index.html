@@ -246,6 +246,109 @@
     color: var(--text);
     background: var(--panel-2);
   }
+  .nav-links a.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* ---------- Left sidebar TOC ---------- */
+  .toc { display: none; }
+
+  .toc-inner { padding: 0 22px; }
+
+  .toc-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px 12px;
+  }
+  .toc-eyebrow::before {
+    content: "";
+    width: 14px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    position: relative;
+  }
+  .toc-list::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .toc-list a {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--text-mid);
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+    transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+  }
+  .toc-list a:hover {
+    color: var(--text);
+    background: var(--panel-2);
+    border-bottom: none;
+  }
+  .toc-list a.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+  }
+  .toc-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+  .toc-list a:hover .toc-num,
+  .toc-list a.active .toc-num { color: var(--accent); }
+
+  .toc-divider {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 22px 12px;
+  }
+  .toc-foot {
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+  }
+  .toc-foot .toc-foot-label {
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .toc-foot a {
+    color: var(--text-mid);
+    border-bottom: 1px solid transparent;
+    display: inline-block;
+  }
+  .toc-foot a:hover { color: var(--accent); border-bottom-color: var(--accent-line); }
 
   /* ---------- Theme toggle ---------- */
   .theme-toggle {
@@ -808,6 +911,25 @@
   footer .sep { color: var(--border-strong); margin: 0 10px; }
 
   /* ---------- Responsive ---------- */
+  @media (min-width: 1100px) {
+    body { padding-left: 268px; }
+    .nav-links { display: none; }
+    .toc {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 268px;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 35;
+      padding-top: 80px;
+      padding-bottom: 32px;
+    }
+  }
+
   @media (max-width: 760px) {
     body { font-size: 17px; }
     .nav-inner { gap: 14px; padding: 12px var(--gutter); }
@@ -872,6 +994,27 @@
     </button>
   </div>
 </nav>
+
+<aside class="toc" aria-label="Table of contents">
+  <div class="toc-inner">
+    <div class="toc-eyebrow">Contents</div>
+    <ol class="toc-list">
+      <li><a href="#introduction"><span class="toc-num">01</span><span>Introduction</span></a></li>
+      <li><a href="#concepts"><span class="toc-num">02</span><span>Concepts</span></a></li>
+      <li><a href="#why"><span class="toc-num">03</span><span>Why CALM</span></a></li>
+      <li><a href="#install"><span class="toc-num">04</span><span>Install</span></a></li>
+      <li><a href="#tutorial"><span class="toc-num">05</span><span>Tutorial</span></a></li>
+      <li><a href="#glossary"><span class="toc-num">06</span><span>Glossary</span></a></li>
+      <li><a href="#takeaways"><span class="toc-num">07</span><span>Takeaways</span></a></li>
+      <li><a href="#reading"><span class="toc-num">08</span><span>Reading</span></a></li>
+    </ol>
+    <hr class="toc-divider">
+    <div class="toc-foot">
+      <span class="toc-foot-label">Author</span>
+      <a href="https://github.com/jamesbuckett" target="_blank" rel="noopener">github.com/jamesbuckett</a>
+    </div>
+  </div>
+</aside>
 
 <main id="top">
 
@@ -2093,25 +2236,23 @@ mvn quarkus:dev
       });
     }
 
-    // Highlight active section in nav on scroll
+    // Highlight active section in top nav and side TOC on scroll
     var sections = document.querySelectorAll('main section[id]');
-    var links = document.querySelectorAll('.nav-links a');
+    var links = document.querySelectorAll('.nav-links a, .toc-list a');
     if ('IntersectionObserver' in window && sections.length && links.length) {
       var byId = {};
       links.forEach(function (a) {
         var id = a.getAttribute('href').replace('#', '');
-        byId[id] = a;
+        if (!byId[id]) byId[id] = [];
+        byId[id].push(a);
       });
       var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (e.isIntersecting) {
             var id = e.target.getAttribute('id');
-            links.forEach(function (a) { a.style.color = ''; a.style.background = ''; });
+            links.forEach(function (a) { a.classList.remove('active'); });
             var active = byId[id];
-            if (active) {
-              active.style.color = 'var(--accent)';
-              active.style.background = 'var(--accent-soft)';
-            }
+            if (active) active.forEach(function (a) { a.classList.add('active'); });
           }
         });
       }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
