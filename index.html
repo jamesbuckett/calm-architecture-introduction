@@ -1493,17 +1493,73 @@
       <h2 class="section-title">Install on Ubuntu 26.04 LTS.</h2>
       <p class="section-lead">
         CALM ships as an npm CLI. The only hard prerequisite is Node.js 18+. Java 21 and Maven are needed
-        <em>only</em> if you intend to run CALM Hub locally; the CLI itself does not need them.
+        <em>only</em> if you intend to run CALM Hub locally; the CLI itself does not need them. Start with
+        the preflight check &mdash; if a binary already shows <code>ok</code>, skip the step that installs it.
       </p>
 
       <ol class="steps">
         <li class="step">
           <div class="step-head">
             <span class="step-num"></span>
+            <h3 class="step-title">Preflight &mdash; check what is already installed</h3>
+          </div>
+          <div class="step-body">
+            <p>
+              Run the loop below once. It probes every binary the rest of this section installs and prints
+              <code>ok</code> with a version or <code>missing</code>. Each subsequent step is safe to skip if its
+              binary reports <code>ok</code> at a recent enough version (Node 18+, Java 21+ for CALM Hub).
+            </p>
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">Copy</button></div>
+<pre><span class="c-cmt"># report which prerequisites are present on this machine</span>
+for cmd in curl gpg make git node npm calm java mvn; do
+  if command -v "$cmd" &gt;/dev/null 2&gt;&amp;1; then
+    ver=$("$cmd" --version 2&gt;/dev/null | head -n1)
+    printf "  ok       %-6s  %s\n" "$cmd" "$ver"
+  else
+    printf "  missing  %-6s  -\n"   "$cmd"
+  fi
+done</pre>
+            </div>
+            <p style="margin-top: 14px;">Typical output on a fresh Ubuntu 26.04 box:</p>
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">output</span><button class="code-copy" type="button">Copy</button></div>
+<pre><span class="c-ok">  ok       curl    curl 8.5.0 (x86_64-pc-linux-gnu)</span>
+<span class="c-ok">  ok       gpg     gpg (GnuPG) 2.4.4</span>
+<span class="c-out">  missing  make    -</span>
+<span class="c-ok">  ok       git     git version 2.43.0</span>
+<span class="c-out">  missing  node    -</span>
+<span class="c-out">  missing  npm     -</span>
+<span class="c-out">  missing  calm    -</span>
+<span class="c-out">  missing  java    -</span>
+<span class="c-out">  missing  mvn     -</span></pre>
+            </div>
+            <div class="callout ok" style="margin-top: 14px;">
+              <span class="callout-label">How to read it</span>
+              <p>
+                <strong>Step 02</strong> covers <code>curl</code>, <code>gpg</code>, <code>make</code> (from
+                <code>build-essential</code>), and <code>git</code>. <strong>Step 03</strong> installs
+                <code>node</code> and <code>npm</code>. <strong>Step 05</strong> installs <code>calm</code>.
+                <strong>Step 07</strong> &mdash; optional &mdash; installs <code>java</code> and <code>mvn</code>.
+                If a row already says <code>ok</code>, jump past the step that would install it. Also re-check the
+                version: Node must be 18+ and Java 21+ for CALM Hub; if an older version is on PATH, treat the
+                row as missing and reinstall.
+              </p>
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num"></span>
             <h3 class="step-title">Update apt and install prerequisites</h3>
           </div>
           <div class="step-body">
-            <p>Refresh the package index and install the small set of tools we need to bootstrap Node.</p>
+            <p>
+              Refresh the package index and install the small set of tools we need to bootstrap Node. Skip this step
+              if the preflight reported <code>ok</code> for <code>curl</code>, <code>gpg</code>, <code>make</code>,
+              and <code>git</code> &mdash; <code>ca-certificates</code> is preinstalled on Ubuntu Server images.
+            </p>
             <div class="code-block">
               <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">Copy</button></div>
 <pre><span class="c-cmt"># refresh index, install build essentials and curl</span>
@@ -1522,7 +1578,9 @@ sudo apt install -y curl ca-certificates gnupg build-essential git</pre>
             <p>
               Ubuntu 26.04 ships a recent Node in <code>apt</code>, but it tracks Debian&rsquo;s snapshot and can
               drift from the active LTS. Use the NodeSource repository to pin Node 22.x &mdash; the CLI requires
-              Node 18+, and Node 22 is the current LTS line (Node 20 reached end-of-life in April 2026).
+              Node 18+, and Node 22 is the current LTS line (Node 20 reached end-of-life in April 2026). Skip this
+              step if the preflight reported <code>ok</code> for both <code>node</code> and <code>npm</code> at
+              <strong>v18 or newer</strong>.
             </p>
             <div class="code-block">
               <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">Copy</button></div>
@@ -1556,7 +1614,10 @@ npm --version
             <h3 class="step-title">Install the CALM CLI globally</h3>
           </div>
           <div class="step-body">
-            <p>Pull the official package from npm. The binary is exposed as <code>calm</code>.</p>
+            <p>
+              Pull the official package from npm. The binary is exposed as <code>calm</code>. Skip if the
+              preflight already reported <code>ok</code> for <code>calm</code> &mdash; re-run only to upgrade.
+            </p>
             <div class="code-block">
               <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">Copy</button></div>
 <pre>npm install -g @finos/calm-cli</pre>
@@ -1602,7 +1663,8 @@ calm --help
           <div class="step-body">
             <p>
               Only required if you intend to run the CALM Hub registry/visualisation server locally. It is a Quarkus
-              application and will not start without Java 21+ and Maven 3.8.6+.
+              application and will not start without Java 21+ and Maven 3.8.6+. Skip if the preflight reported
+              <code>ok</code> for both <code>java</code> (<strong>21 or newer</strong>) and <code>mvn</code>.
             </p>
             <div class="code-block">
               <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">Copy</button></div>
