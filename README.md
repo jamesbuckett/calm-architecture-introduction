@@ -1,5 +1,10 @@
 # calm-architecture-introduction
 
+[![License: ISC](https://img.shields.io/github/license/jamesbuckett/calm-architecture-introduction?color=blue)](./package.json)
+[![FINOS CALM](https://img.shields.io/badge/FINOS-CALM-1f6feb)](https://github.com/finos/architecture-as-code)
+[![Architecture as Code](https://img.shields.io/badge/architecture--as--code-active-2ea043)](https://github.com/topics/architecture-as-code)
+[![Single-file HTML](https://img.shields.io/badge/single--file-HTML-orange)](./index.html)
+
 **TL;DR** — A single-file, self-contained HTML primer on the [FINOS Common Architecture Language Model (CALM)](https://github.com/finos/architecture-as-code), aimed at architects in regulated environments (banking, payments, capital markets). Open `index.html` in a browser. That's it.
 
 ---
